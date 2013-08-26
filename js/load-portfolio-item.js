@@ -1,0 +1,1 @@
+$(function(){function o(o){$image_lg=$('<img src="'+l+portfolio_item_data[o]+'" />'),$detail_el.html($image_lg)}if(window.portfolio_item_ids){var i=location.hash||window.portfolio_item_ids[0],l="/images/portfolio/";$detail_el=$("#portfolio-detail"),o(i),$("#portfolio_carousel a.load-portfolio-id").click(function(){console.log("CLICKED"),console.log($(this)),o(this.hash)})}});
