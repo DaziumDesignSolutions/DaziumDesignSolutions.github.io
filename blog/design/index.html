@@ -6,7 +6,8 @@
   <meta name = "format-detection" content = "telephone=no" />
   <link rel="icon" href="images/favicon.ico">
   <link rel="shortcut icon" href="images/favicon.ico" />
-  <link href="/css/style.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="/css/prism/prism.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/css/style.css" media="screen" rel="stylesheet" type="text/css" />
 <link href="/css/form.css" media="screen" rel="stylesheet" type="text/css" />
   <!--[if lt IE 8]>
     <div style=' clear: both; text-align:center; position: relative;'>
@@ -64,6 +65,47 @@
   <h3 class='head1'><span>design</span>blog
   </h3>
   <div id='recent-posts'>
+    <article class='blog clearfix'>
+      <div class='text1'>MacBook Users - Switch Network Profiles with Ease</div>
+      <div class='col1'>
+        Posted on
+        <time datetime='2013-10-25 00:00:00 -0500'>25th October 2013</time>
+        by
+        <a>Kara</a>
+      </div>
+      <div class='article-teaser'>
+        <p>Anyone who uses a MacBook Pro frequently in multiple locations requiring at least one or more specific network configuration should hopefully find this useful.</p>
+        
+        <p>I got tired of always opening up System Prefs, going to Network config, and switching locations. Automatic doesn't work to change DNS servers and for some reason switching locations takes at least 5 seconds.</p>
+        
+        <p>After finally getting tired of doing several times a day, I finally searched around and found the command-line tool to do the same and packaged it up as part of a bash function:</p>
+        
+        <pre><code class="language-bash">function mup() {
+          case "$1" in
+            work|Work)
+              echo "Engaging work profile"
+              sudo networksetup -setairportpower en1 off
+              sudo networksetup...</code></pre>
+      </div>
+      <a class='btn' href='/blog/webdev/2013/10/25/switch-network-profiles-with-ease/'>read more</a>
+    </article>
+    <article class='blog clearfix'>
+      <div class='text1'>Upgrading from Grunt 0.3 to 0.4</div>
+      <div class='col1'>
+        Posted on
+        <time datetime='2013-09-30 00:00:00 -0500'>30th September 2013</time>
+        by
+        <a>Kara</a>
+      </div>
+      <div class='article-teaser'>
+        <p>I created a project back in January when Grunt v0.3 was the latest available. I'd read about some of the arthitectural changes that occurred in the v0.4 version. Knowing it was a sizable enough difference, I'd been putting it off. Well, I finally took the time to upgrade. I'm glad I did, as the newer Gruntfile.js layout is a more configurable, logical, and intuitive as far as implementing newer functionality through plugins.</p>
+        
+        <h2>v0.3 to v0.4 - the diff lowdown</h2>
+        
+        <p>Whereas Grunt v0.3 aimed to be the solution in a package, v0.4 is now the string that binds the package together. The package contents is now defined by the project itself, through grunt plugins. Functionality such as jshint, concat, minifaction...</p>
+      </div>
+      <a class='btn' href='/blog/webdev/2013/09/30/upgrading-from-grunt-v0.3-to-v0.4/'>read more</a>
+    </article>
     <article class='blog clearfix'>
       <div class='text1'>Open Source Flowchart Options for the Mac</div>
       <div class='col1'>
@@ -143,6 +185,7 @@
 
   <script src="/js/jquery.js" type="text/javascript"></script>
 <script src="/js/jquery-migrate-1.1.1.js" type="text/javascript"></script>
+<script src="/js/prism/prism.min.js" type="text/javascript"></script>
 <script src="/js/script.js" type="text/javascript"></script>
 <script src="/js/superfish.js" type="text/javascript"></script>
 <script src="/js/jquery.ui.totop.js" type="text/javascript"></script>
@@ -151,8 +194,6 @@
 <script src="/js/jquery.easing.1.3.js" type="text/javascript"></script>
 <script src="/js/jquery.carouFredSel-6.1.0-packed.js" type="text/javascript"></script>
 <script src="/js/jquery.touchSwipe.min.js" type="text/javascript"></script>
-<script src="/js/holder.js" type="text/javascript"></script>
-<script src="/js/load-portfolio-item.js" type="text/javascript"></script>
   <script>
   $(window).load (
     function(){$('.carousel1').carouFredSel({auto: false,prev: '.prev',next: '.next', width: 240, items: {

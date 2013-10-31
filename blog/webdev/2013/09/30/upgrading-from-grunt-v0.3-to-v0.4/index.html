@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Upgrading from Grunt 0.3 to 0.4 | Dazium Design Solutions</title>
+  <meta charset="utf-8">
+  <meta name = "format-detection" content = "telephone=no" />
+  <link rel="icon" href="images/favicon.ico">
+  <link rel="shortcut icon" href="images/favicon.ico" />
+  <link href="/css/prism/prism.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/css/style.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/css/form.css" media="screen" rel="stylesheet" type="text/css" />
+  <!--[if lt IE 8]>
+    <div style=' clear: both; text-align:center; position: relative;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+    <img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." />
+    </a>
+    </div>
+  <![endif]-->
+  <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <link rel="stylesheet" media="screen" href="/css/ie.css">
+    <link href='//fonts.googleapis.com/css?family=Lato:400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:700' rel='stylesheet' type='text/css'>
+  <![endif]-->
+</head>
+<body class="blog-detail">
+  <header class="mb0"><div>
+  <div class="container_24">
+    <div class="grid_24">
+      <h1><a href="index.html"><img src="/images/logo.png" alt="Dazium Design Solutions"></a></h1>
+      <div class="menu_block">
+  <nav>
+    <ul class="sf-menu">
+      
+        <li><a href="/">Home</a></li>
+      
+      
+        
+        <li><a href="/about-us">About Us</a></li>
+      
+        
+        <li><a href="/services">Services</a></li>
+      
+        
+        <li><a href="/portfolio.html">Portfolio</a></li>
+      
+        
+        <li><a href="/contact-us">Contact Us</a></li>
+      
+        
+        <li class="current"><a href="/blog">Blog</a></li>
+      
+    </ul>
+  </nav>
+  <div class="clear"></div>
+</div>
+      <div class="clear"></div>
+    </div>
+  </div></div>
+</header>
+
+  <div class="content">
+    <div class="container_24">
+      <article id="post-detail" class="grid_24">
+        
+        
+        <h1>Upgrading from Grunt 0.3 to 0.4</h1>
+        
+        
+        <p>I created a project back in January when Grunt v0.3 was the latest available. I&#39;d read about some of the arthitectural changes that occurred in the v0.4 version. Knowing it was a sizable enough difference, I&#39;d been putting it off. Well, I finally took the time to upgrade. I&#39;m glad I did, as the newer Gruntfile.js layout is a more configurable, logical, and intuitive as far as implementing newer functionality through plugins.</p>
+
+<h2>v0.3 to v0.4 - the diff lowdown</h2>
+
+<p>Whereas Grunt v0.3 aimed to be the solution in a package, v0.4 is now the string that binds the package together. The package contents is now defined by the project itself, through grunt plugins. Functionality such as jshint, concat, minifaction, and watch are now all split up into grunt-contrib plugins. The <a title="Upgrading from 0.3 to 0.4 - Grunt: The JavaScript Task Runner" href="http://gruntjs.com/upgrading-from-0.3-to-0.4#core-tasks-are-now-grunt-plugins">upgrade help page</a> on GruntJS.com shows the breakout for plugin that were part of v0.3 core.</p>
+
+<h2>Adding Plugins</h2>
+
+<p>Get used to using this command:</p>
+
+<pre><code class="language-bash">npm install grunt-&lt;plugin&gt; --save-dev
+</code></pre>
+
+<p>Plugins maintained by the Grunt team are named <code>grunt-contrib-&lt;name&gt;</code>, although most user-contrib plugins I&#39;ve seen are usually named <code>grunt-&lt;name&gt;</code>.</p>
+
+<p>The --save-dev switch tells npm to augment the &quot;devDependencies&quot; property with this dependency, including its version number, in the package.json file so you can easily track what&#39;s been added, and contributors to the project can quickly do a <code>npm install</code> to get all the requirements.</p>
+
+<h2>Gruntfile.js Layout</h2>
+
+<p>This results in a more logical and flexible layout for the gruntfile. Essentially, each plugin is its own key inside the config passed to initConfig. The biggest change which adds flexibility to this layout is the addition of multi-tasks which allows for multiple targets to be defined. Consider this layout:</p>
+
+<pre><code class="language-javascript">jshint: {
+  options: {
+    curly: true
+    ...
+    ,globals: {
+      console: true
+    }
+  },
+  dev: [&#39;dist/dev/*.js&#39;]
+  release: {
+    options: {
+      globals: {}
+    }
+    files: [&#39;dist/release/*.js&#39;]
+  }
+}
+</code></pre>
+
+<p>With the above jshint config, you can use console for the dev target, but lint your releases to make sure no debug code has been inadvertently left in.</p>
+
+<p>The globals object in the target overwrites the object inside options, so you&#39;ll want to copy and modify. Note that <code>console: true</code> and <code>console: false</code> both act as truthy value, but any integer, float, or string acts as a falsy value.</p>
+
+<p>Also, if you add the load-grunt-tasks plugin dev requirement, you don&#39;t have to bother with doing <code>grunt.loadNpmTasks(&#39;grunt-contrib-jshint&#39;); ...</code> for each grunt plugin you wish to add. Instead just add the following line:</p>
+
+<p><code>require(&#39;load-grunt-tasks&#39;)(grunt);</code></p>
+
+<h2>Sample Gruntfile with multiple environments</h2>
+
+<p>I created dev, staging, and release targets for each of the tasks and a custom &#39;build&#39; task that links the separate tasks:</p>
+
+<pre><code class="language-javascript">/*global module:false*/
+
+&#39;use strict&#39;;
+
+module.exports = function(grunt) {
+
+    require(&#39;load-grunt-tasks&#39;)(grunt);
+
+    // Project configuration.
+    grunt.initConfig({
+        pkg: grunt.file.readJSON(&#39;package.json&#39;),
+        meta: {
+            settings: {
+                dev: {
+                    server: &#39;localhost&#39;
+                    ,protocol: &#39;http://&#39;
+                },
+                staging: {
+                    server: &#39;staging&#39;
+                    ,protocol: &#39;http://&#39;
+                },
+                release: {
+                    server: &#39;production&#39;
+                    ,protocol: &#39;http://&#39;
+                }
+            },
+            globals: {
+                jQuery: true
+                ,console: true
+            },
+            banner: &#39;/*!\n&#39; +
+                &#39; * &lt;%= pkg.title || pkg.name %&gt; - v&lt;%= pkg.version %&gt; - &lt;%= grunt.template.today(&quot;yyyy-mm-dd&quot;) %&gt;\n&#39; +
+                &#39; * Copyright (c) &lt;%= grunt.template.today(&quot;yyyy&quot;) %&gt; &lt;%= pkg.owner.name %&gt;\n&#39; +
+                &#39; */&#39;
+        },
+        concat: {
+            dev: {
+                options: {
+                    process: true
+                },
+                files: {
+                    &#39;dist/dev/devcode.js&#39;: [
+                        &#39;src/components/*.js&#39;
+                    ]
+                }
+            },
+            staging: {
+                options: {
+                    process: true
+                },
+                files: {
+                    &#39;dist/staging/staging-&lt;%= pkg.version %&gt;.js&#39;: [
+                        &#39;src/components/staging.js&#39;
+                    ]
+                }
+            },
+            release: {
+                options: {
+                    process: true
+                },
+                files: {
+                    &#39;dist/release/release-&lt;%= pkg.version %&gt;.js&#39;: [
+                        &#39;src/components/release.js&#39;
+                    ]
+                }
+            }
+        },
+        jshint: {
+            options: {
+                curly: true
+                ,eqeqeq: true
+                ,laxcomma: true
+                ,immed: true
+                ,latedef: true
+                ,newcap: true
+                ,noarg: true
+                ,sub: true
+                ,undef: true
+                ,boss: true
+                ,eqnull: true
+                ,browser: true
+                ,jquery: true
+                ,globals: &#39;&lt;%= meta.globals %&gt;&#39;
+            },
+            dev: [&#39;dist/dev/*.js&#39;]
+            release: {
+                options: {
+                    globals: {}
+                }
+                files: [&#39;dist/release/*.js&#39;]
+            }
+        },
+        mocha: {
+            options: {
+                globals: {
+                    jQuery: true
+                },
+                reporter: &#39;Spec&#39;
+            },
+            dev: {
+                options: {
+                    urls: [&#39;http://localhost/test/index.html&#39;]
+                }
+            },
+            staging: {
+                options: {
+                    urls: [&#39;http://staging/test/index.html&#39;]
+                }
+            },
+            release: {
+                options: {
+                    urls: [&#39;http://production/test/index.html&#39;]
+                }
+            }
+        },
+        uglify: {
+            options: {
+                banner: &#39;&lt;%= meta.banner %&gt;&#39;
+            },
+            release: {
+                files: {
+                    &#39;dist/release/release-&lt;%= pkg.version %&gt;.min.js&#39;: [&#39;dist/release/release-&lt;%= pkg.version %&gt;.js&#39;]
+                }
+            }
+        },
+        watch: {
+            files: [&#39;src/components/**/*.js&#39;, &#39;test/*.html&#39;, &#39;test/spec/*.js&#39;]
+            ,tasks: [&#39;build:dev&#39;]
+        },
+    });
+
+    // Custom build task for different environments
+    grunt.registerTask(&#39;build&#39;, &quot;Build for dev, test, or prod.\n$ grunt build:dev. Eg:&quot;, function(environment) {
+        if ([&#39;dev&#39;, &#39;staging&#39;, &#39;release&#39;, &#39;all&#39;].indexOf(environment) &lt; 0) { console.warn(&#39;No such environment.&#39;); return false; }
+        switch(environment) {
+        case &#39;dev&#39;:     grunt.task.run(&#39;concat:dev&#39;, &#39;jshint:dev&#39;, &#39;mocha:dev&#39;); break;
+        case &#39;staging&#39;: grunt.task.run(&#39;concat:staging&#39;); break;
+        case &#39;release&#39;: grunt.task.run(&#39;concat:release&#39;, &#39;uglify:release&#39;, &#39;concat:release&#39;); break;
+        case &#39;all&#39;: grunt.task.run(&#39;build:dev&#39;, &#39;build:staging&#39;, &#39;build:release&#39;);
+        }
+    });
+
+        // Default task.
+        grunt.registerTask(&#39;default&#39;, [&#39;build:release&#39;]);
+
+    };
+</code></pre>
+
+      </div>
+      <div class="clear"></div>
+    </div>
+  </div>
+
+  <div id="footer-grass"></div>
+<div class="bottom_block">
+  <div class="container_24">
+    <div class="grid_6">
+      <h4>Contact</h4>
+      <address>
+        <dl>
+          <dt>
+            1600 Genessee, Suite 660<br />
+            Kansas City, MO 64102<br />
+            6th floor, just a u-turn from the elevators
+          </dt>
+          <dd><span>Phone:</span>816-842-0001</dd>
+          <dd>E-mail: <a href="info@dazium.com" class="link-1">info@dazium.com</a></dd>
+        </dl>
+      </address>
+    </div>
+    <div class="grid_6">&nbsp;</div>
+    <div class="grid_6">
+      <h4>popular</h4>
+      <ul class="li">
+        <li>Kara Hess - Designer</li>
+        <li>Cristin Euston - Designer</li>
+        <li>Craig Hess - Web Application Developer</li>
+        <li>Judy Callahan - Content Expert</li>
+      </ul>
+    </div>
+    <div class="grid_6">
+      <h4>links</h4>
+      <ul>
+        <li><a href="/about-us">About Us</a></li>
+        <li><a href="/services">Services</a></li>
+        <li><a href="/portfolio">Portfolio</a></li>
+        <li><a href="/contact-us">Contact Us</a></li>
+        <li><a href="/blog">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+<footer>
+  <div class="container_24">
+    <div class="grid_24">
+      <div class="socials">
+        <a href="https://twitter.com/DaziumDesign"><img src="/images/twitter.png"  alt=""></a>
+        <a href="https://www.facebook.com/DaziumDesignServices"><img src="/images/fb.png" alt=""></a>
+        
+      </div>
+      <div class="copy">&copy; 2013 Dazium Design Solutions</div>
+    </div>
+    <div class="clear"></div>
+  </div>
+</footer>
+
+  <script src="/js/jquery.js" type="text/javascript"></script>
+<script src="/js/jquery-migrate-1.1.1.js" type="text/javascript"></script>
+<script src="/js/prism/prism.min.js" type="text/javascript"></script>
+<script src="/js/script.js" type="text/javascript"></script>
+<script src="/js/superfish.js" type="text/javascript"></script>
+<script src="/js/jquery.ui.totop.js" type="text/javascript"></script>
+<script src="/js/jquery.equalheights.js" type="text/javascript"></script>
+<script src="/js/jquery.mobilemenu.js" type="text/javascript"></script>
+<script src="/js/jquery.easing.1.3.js" type="text/javascript"></script>
+<script src="/js/jquery.carouFredSel-6.1.0-packed.js" type="text/javascript"></script>
+<script src="/js/jquery.touchSwipe.min.js" type="text/javascript"></script>
+  <script>
+  $(window).load (
+    function(){$('.carousel1').carouFredSel({auto: false,prev: '.prev',next: '.next', width: 240, items: {
+      visible : {min: 1,
+        max: 4
+      },
+      height: 'auto',
+      width: 240,
+    }, responsive: true,
+    scroll: 1,
+    mousewheel: false,
+    swipe: {onMouse: true, onTouch: true}});
+  } );
+  jQuery(function(){
+    $().UItoTop({ easingType: 'easeOutQuart' });
+  });
+  </script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41072736-1', 'dazium.com');
+  ga('send', 'pageview');
+
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title> | Dazium Design Solutions</title>
+  <title>MacBook Users - Switch Network Profiles with Ease | Dazium Design Solutions</title>
   <meta charset="utf-8">
   <meta name = "format-detection" content = "telephone=no" />
   <link rel="icon" href="images/favicon.ico">
@@ -23,7 +23,7 @@
     <link href='//fonts.googleapis.com/css?family=Lato:700' rel='stylesheet' type='text/css'>
   <![endif]-->
 </head>
-<body class="page1">
+<body class="blog-detail">
   <header class="mb0"><div>
   <div class="container_24">
     <div class="grid_24">
@@ -61,24 +61,100 @@
 
   <div class="content">
     <div class="container_24">
-      <h1>Archive for
-  
-    Aug 21 2013
-  
-</h1>
+      <article id="post-detail" class="grid_24">
+        
+        
+        <h1>MacBook Users - Switch Network Profiles with Ease</h1>
+        
+        
+        <p>Anyone who uses a MacBook Pro frequently in multiple locations requiring at least one or more specific network configuration should hopefully find this useful.</p>
 
-  <p>Page 1 of 1</p>
+<p>I got tired of always opening up System Prefs, going to Network config, and switching locations. Automatic doesn&#39;t work to change DNS servers and for some reason switching locations takes at least 5 seconds.</p>
 
-  
+<p>After finally getting tired of doing several times a day, I finally searched around and found the command-line tool to do the same and packaged it up as part of a bash function:</p>
 
-<ul>
-  
-    <li><a href="/blog/webdev/2013/08/21/open-source-flowchart-options-for-the-mac/">Open Source Flowchart Options for the Mac</a> <span>Aug 21</span></li>
-  
-</ul>
+<pre><code class="language-bash">function mup() {
+  case &quot;$1&quot; in
+    work|Work)
+      echo &quot;Engaging work profile&quot;
+      sudo networksetup -setairportpower en1 off
+      sudo networksetup -switchtolocation Work
+      wresize-common
+      ;;
+    home|Home)
+      echo &quot;Engaging home profile&quot;
+      sudo networksetup -setairportpower en1 on
+      sudo networksetup -switchtolocation Home
+      ;;
+    other|Other)
+      echo &quot;Engaging other profile&quot;
+      sudo networksetup -setairportpower en1 on
+      sudo networksetup -switchtolocation Other
+      ;;
+    *)
+      networksetup -getcurrentlocation
+  esac
+}
+</code></pre>
 
-  
+<p>Of course name the function whatever you want, but &quot;mac user profile&quot; seemed to be easy to remember, so I stuck with <code>mup</code>. Running <code>mup</code> with no arguments returns the name of the current location.</p>
 
+<p>The other benefit with this setup is that I can easily run whatever other scripts or programs I want for each profile. You may have noticed <code>wresize-common</code> in the work profile -- I got tired of resizing windows when I plugged my MacBook into the large external monitor and wrote a MacRuby script to do just that. Below is that script:</p>
+
+<pre><code class="language-ruby">#!/usr/local/bin/macruby
+
+framework &quot;ScriptingBridge&quot;
+
+APPLICATIONS = `mdfind -onlyin /Applications kMDItemKind==Application`.split(&quot;\n&quot;)
+$not_found = []
+
+def grep_for_bundleid_from_string(app_strings)
+  app_bundles = []
+  app_strings = app_strings.split(&#39;,&#39;)
+  app_strings.each do |app_string|
+    found = APPLICATIONS.grep(/#{app_string}/i)
+    if found.length &lt;= 0
+      puts &quot;NOT FOUND&quot;
+      $not_found &lt;&lt; found
+      next
+    end
+    app_bundles &lt;&lt; `defaults read &quot;#{found[0]}/Contents/Info&quot; CFBundleIdentifier`.chomp
+  end
+
+  app_bundles
+end
+
+def get_bundleid
+  pid = ARGV.first.to_i
+  cmd = `ps -p #{pid} -o command`.split(&quot;\n&quot;)[1].match(/^(.*?)\.app/)[0]
+  bundleid = `mdls -name kMDItemCFBundleIdentifier &quot;#{cmd}&quot;`.match(/^kMDItemCFBundleIdentifier = &quot;(.*?)&quot;/)[1]
+  puts &quot;Bundle Identifier: #{bundleid}&quot;
+  return bundleid
+end
+
+def resize_all_windows_for_app(app)
+  app.windows.each do |win|
+    bounds = win.bounds
+    bounds.origin.y = 22.0
+    bounds.size.height = 1440.0
+    win.setBounds(bounds)
+  end
+end
+
+apps = grep_for_bundleid_from_string(ARGV.first)
+apps.each do |app_id|
+  app = SBApplication.applicationWithBundleIdentifier(app_id)
+  puts resize_all_windows_for_app(app)
+end
+</code></pre>
+
+<p>This program takes in arguments of the form &quot;program1,program2&quot; etc, with whatever programs you want to have resized -- no spaces. The geometry is static since I&#39;ve no need of making it dynamic and it works for the external monitor I use. I saved the above as wresize and created the alias <code>wresize-common</code> to be <code>wresize chrome,safari,textmate,textmate2,iterm</code>.</p>
+
+<p>Minor annoyance on 10.7+ -- Lion introduced Automatic Termination which decides when a program quit via the GUI is actually terminated in the background. Check out this bit from <a href="http://arstechnica.com/apple/2011/07/mac-os-x-10-7/8/#process-model">John Siracusa&#39;s review of Lion</a> for more info on that. That means <code>ps</code> can get a handle on programs running in the background that have actually been quit via the GUI. This will cause those programs to launch in the GUI again, forcing you to re-quit them. Haven&#39;t been bugged enough yet to work a fix for that.</p>
+
+<p>Now, the most I have to do when I switch locations is just <code>mup location</code>.</p>
+
+      </div>
       <div class="clear"></div>
     </div>
   </div>
